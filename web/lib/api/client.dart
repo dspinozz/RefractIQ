@@ -1,0 +1,187 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class ApiClient {
+  final String baseUrl;
+  
+  // Base URL can be set via environment variable or build-time configuration
+  // Default to localhost for development, override for production
+  ApiClient({String? baseUrl}) 
+      : baseUrl = baseUrl ?? 
+          (const String.fromEnvironment('API_BASE_URL', 
+              defaultValue: 'http://localhost:9000'));
+
+  Future<List<Device>> getDevices() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/v1/devices'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (data['devices'] as List)
+          .map((d) => Device.fromJson(d))
+          .toList();
+    } else {
+      throw Exception('Failed to load devices');
+    }
+  }
+
+  Future<DeviceReadings> getDeviceReadings(String deviceId, {int limit = 100}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/v1/devices/$deviceId/readings?limit=$limit'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return DeviceReadings.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load readings');
+    }
+  }
+
+  Future<void> postReading(ReadingPayload payload) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/readings'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(payload.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to post reading: ${response.body}');
+    }
+  }
+}
+
+class Device {
+  final String deviceId;
+  final String? name;
+  final DateTime? lastSeenAt;
+  final String status;
+  final LatestReading? latestReading;
+  final double? targetRi;
+  final double? alertLow;
+  final double? alertHigh;
+
+  Device({
+    required this.deviceId,
+    this.name,
+    this.lastSeenAt,
+    required this.status,
+    this.latestReading,
+    this.targetRi,
+    this.alertLow,
+    this.alertHigh,
+  });
+
+  factory Device.fromJson(Map<String, dynamic> json) {
+    return Device(
+      deviceId: json['device_id'],
+      name: json['name'],
+      lastSeenAt: json['last_seen_at'] != null
+          ? DateTime.parse(json['last_seen_at'])
+          : null,
+      status: json['status'],
+      latestReading: json['latest_reading'] != null
+          ? LatestReading.fromJson(json['latest_reading'])
+          : null,
+      targetRi: json['target_ri'] != null ? (json['target_ri'] as num).toDouble() : null,
+      alertLow: json['alert_low'] != null ? (json['alert_low'] as num).toDouble() : null,
+      alertHigh: json['alert_high'] != null ? (json['alert_high'] as num).toDouble() : null,
+    );
+  }
+}
+
+class LatestReading {
+  final double value;
+  final String unit;
+  final DateTime ts;
+
+  LatestReading({
+    required this.value,
+    required this.unit,
+    required this.ts,
+  });
+
+  factory LatestReading.fromJson(Map<String, dynamic> json) {
+    return LatestReading(
+      value: json['value'].toDouble(),
+      unit: json['unit'],
+      ts: DateTime.parse(json['ts']),
+    );
+  }
+}
+
+class DeviceReadings {
+  final String deviceId;
+  final List<Reading> readings;
+
+  DeviceReadings({
+    required this.deviceId,
+    required this.readings,
+  });
+
+  factory DeviceReadings.fromJson(Map<String, dynamic> json) {
+    return DeviceReadings(
+      deviceId: json['device_id'],
+      readings: (json['readings'] as List)
+          .map((r) => Reading.fromJson(r))
+          .toList(),
+    );
+  }
+}
+
+class Reading {
+  final int id;
+  final DateTime ts;
+  final double value;
+  final String unit;
+  final double? temperatureC;
+
+  Reading({
+    required this.id,
+    required this.ts,
+    required this.value,
+    required this.unit,
+    this.temperatureC,
+  });
+
+  factory Reading.fromJson(Map<String, dynamic> json) {
+    return Reading(
+      id: json['id'],
+      ts: DateTime.parse(json['ts']),
+      value: json['value'].toDouble(),
+      unit: json['unit'],
+      temperatureC: json['temperature_c']?.toDouble(),
+    );
+  }
+}
+
+class ReadingPayload {
+  final String deviceId;
+  final DateTime ts;
+  final double value;
+  final String unit;
+  final double? temperatureC;
+  final String? eventId;
+
+  ReadingPayload({
+    required this.deviceId,
+    required this.ts,
+    required this.value,
+    required this.unit,
+    this.temperatureC,
+    this.eventId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'device_id': deviceId,
+      'ts': ts.toIso8601String(),
+      'value': value,
+      'unit': unit,
+      if (temperatureC != null) 'temperature_c': temperatureC,
+      if (eventId != null) 'event_id': eventId,
+    };
+  }
+}

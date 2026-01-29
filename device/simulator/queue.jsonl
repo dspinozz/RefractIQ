@@ -1,0 +1,2 @@
+{"device_id": "DEMO-001", "ts": "2026-01-29T00:06:25.659923+00:00", "value": 1.3321, "unit": "RI", "temperature_c": 24.5, "event_id": "2406a68b-2d78-4d37-a9d4-aba8227f1350"}
+{"device_id": "DEMO-001", "ts": "2026-01-29T00:07:10.729579+00:00", "value": 1.335, "unit": "RI", "temperature_c": 26.3, "event_id": "13943282-303e-47cf-b67e-02e653a7c2d5"}

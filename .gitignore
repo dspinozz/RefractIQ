@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+queue.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Device client build artifacts
+device/c-client/refract_client
+device/c-client/*.o
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# AI Development Artifacts
+.cursor/
+.cursorrules
+*.cursor-*
+.cursor-*
+.copilot/
+.copilot-*
+*.ai.md
+*_ai_*
+ai_*
+.cursorignore
+
+# Development Process Artifacts (temporary docs)
+GAPS_FILLED.md
+VERIFICATION_SUMMARY.md
+DEPLOYMENT_TEST_RESULTS.md
+
+# MyPy cache (already covered but explicit)
+.mypy_cache/
+**/.mypy_cache/
